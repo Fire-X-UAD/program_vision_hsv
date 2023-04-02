@@ -204,7 +204,7 @@ while True:
           center_x = int(x + (w*0.5))
           center_y = int(y + (h*0.5))
           if w > 5 and h > 5:
-            titik_tengah = (int(frame.shape[1] / 2)+offsetx-320, int(frame.shape[0]))
+            titik_tengah = (int(offsetx), int(frame.shape[0]))
             cv2.line(frame, titik_tengah, (center_x, center_y), (0, 255, 0), 2, cv2.LINE_AA)
             angle = int(math.atan2(titik_tengah[1] - center_y, titik_tengah[0] - center_x) * 180 / math.pi)
             angle = angle - 90 if angle > 90 else angle + 270
