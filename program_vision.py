@@ -4,10 +4,6 @@ import math
 import serial
 import json
 
-# KONFIGURASI
-PORT_SERIAL = "COM101"
-BUFFER = 4
-
 # Variabel Global
 crop_img = None
 angle = -1
@@ -28,7 +24,9 @@ default_config = {
     "p2": 19,
     "minrad": 83,
     "maxrad": 200,
-    "offsetx": 300
+    "offsetx": 300,
+    "serial": "COM101",
+    "buffer": 4
 }
 
 
@@ -56,7 +54,8 @@ param2 = config["p2"]
 minrad = config["minrad"]
 maxrad = config["maxrad"]
 offsetx = config["offsetx"]
-
+PORT_SERIAL = config["serial"]
+BUFFER = config["buffer"]
 
 def on_trackbar(val):
     global config
