@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import math
 import serial
+import json
 
 # KONFIGURASI
 PORT_SERIAL = "COM101"
@@ -12,26 +13,94 @@ crop_img = None
 angle = -1
 k_buffer = 0
 
-ser = serial.Serial(PORT_SERIAL, 9600, timeout=0, parity=serial.PARITY_NONE, rtscts=1)
+# ser = serial.Serial(PORT_SERIAL, 9600, timeout=0, parity=serial.PARITY_NONE, rtscts=1)
 
 cv2.namedWindow('Trackbars', cv2.WINDOW_NORMAL)
 
+default_config = {
+    "H_MIN": 0,
+    "H_MAX": 12,
+    "S_MIN": 60,
+    "S_MAX": 255,
+    "V_MIN": 122,
+    "V_MAX": 255,
+    "p1": 69,
+    "p2": 19,
+    "minrad": 83,
+    "maxrad": 200,
+    "offsetx": 300
+}
+
+
+H_min = H_max = S_min = S_max = V_min = V_max = param1 = param2 = minrad = maxrad = offsetx = 0
+def save_config():
+    with open("config.json", "w") as f:
+        json.dump(config, f)
+try:
+    with open("config.json", "r") as f:
+        config = json.load(f)
+
+except:
+    config = default_config
+    with open("config.json", "w") as f:
+        json.dump(default_config, f)
+
+H_min = config["H_MIN"]
+H_max = config["H_MAX"]
+S_min = config["S_MIN"] 
+S_max = config["S_MAX"]
+V_min = config["V_MIN"]
+V_max = config["V_MAX"]
+param1 = config["p1"]
+param2 = config["p2"]
+minrad = config["minrad"]
+maxrad = config["maxrad"]
+offsetx = config["offsetx"]
+
+
 def on_trackbar(val):
+    global config
+    config["H_MIN"] = H_min
+    config["H_MAX"] = H_max
+    config["S_MIN"] = S_min
+    config["S_MAX"] = S_max
+    config["V_MIN"] = V_min
+    config["V_MAX"] = V_max
+    config["p1"] = param1
+    config["p2"] = param2
+    config["minrad"] = minrad
+    config["maxrad"] = maxrad
+    config["offsetx"] = offsetx
+    save_config()
     pass
 
 def creatTrackbar():
     # create trackbars for color range
-    cv2.createTrackbar('H_MIN', 'Trackbars', 0, 180, on_trackbar)
-    cv2.createTrackbar('H_MAX', 'Trackbars', 12, 180, on_trackbar)
-    cv2.createTrackbar('S_MIN', 'Trackbars', 60, 255, on_trackbar)
-    cv2.createTrackbar('S_MAX', 'Trackbars', 255, 255, on_trackbar)
-    cv2.createTrackbar('V_MIN', 'Trackbars', 122, 255, on_trackbar)
-    cv2.createTrackbar('V_MAX', 'Trackbars', 255, 255, on_trackbar)
-    cv2.createTrackbar('p1', 'Trackbars', 69, 200, on_trackbar)
-    cv2.createTrackbar('p2', 'Trackbars', 19, 200, on_trackbar)
-    cv2.createTrackbar('minrad', 'Trackbars', 83, 200, on_trackbar)
-    cv2.createTrackbar('maxrad', 'Trackbars', 200, 200, on_trackbar)
-    cv2.createTrackbar('offsetx', 'Trackbars', 300, 640, on_trackbar) 
+    # cv2.createTrackbar('H_MIN', 'Trackbars', 0, 180, on_trackbar)
+    # cv2.createTrackbar('H_MAX', 'Trackbars', 12, 180, on_trackbar)
+    # cv2.createTrackbar('S_MIN', 'Trackbars', 60, 255, on_trackbar)
+    # cv2.createTrackbar('S_MAX', 'Trackbars', 255, 255, on_trackbar)
+    # cv2.createTrackbar('V_MIN', 'Trackbars', 122, 255, on_trackbar)
+    # cv2.createTrackbar('V_MAX', 'Trackbars', 255, 255, on_trackbar)
+    # cv2.createTrackbar('p1', 'Trackbars', 69, 200, on_trackbar)
+    # cv2.createTrackbar('p2', 'Trackbars', 19, 200, on_trackbar)
+    # cv2.createTrackbar('minrad', 'Trackbars', 83, 200, on_trackbar)
+    # cv2.createTrackbar('maxrad', 'Trackbars', 200, 200, on_trackbar)
+    # cv2.createTrackbar('offsetx', 'Trackbars', 300, 640, on_trackbar) 
+
+    cv2.createTrackbar('H_MIN', 'Trackbars', H_min, 180, on_trackbar)
+    cv2.createTrackbar('H_MAX', 'Trackbars', H_max, 180, on_trackbar)
+    cv2.createTrackbar('S_MIN', 'Trackbars', S_min, 255, on_trackbar)
+    cv2.createTrackbar('S_MAX', 'Trackbars', S_max, 255, on_trackbar)
+    cv2.createTrackbar('V_MIN', 'Trackbars', V_min, 255, on_trackbar)
+    cv2.createTrackbar('V_MAX', 'Trackbars', V_max, 255, on_trackbar)
+    cv2.createTrackbar('p1', 'Trackbars', param1, 200, on_trackbar)
+    cv2.createTrackbar('p2', 'Trackbars', param2, 200, on_trackbar)
+    cv2.createTrackbar('minrad', 'Trackbars', minrad, 200, on_trackbar)
+    cv2.createTrackbar('maxrad', 'Trackbars', maxrad, 200, on_trackbar)
+    cv2.createTrackbar('offsetx', 'Trackbars', offsetx, 640, on_trackbar)
+      
+    
 
 # untuk windows:
 
@@ -147,7 +216,7 @@ while True:
     else:
       buffering(frame)
 
-    ser.write(str(angle).encode()+b"\n")
+    # ser.write(str(angle).encode()+b"\n")
 
     # show angle to frame 
     cv2.putText(frame, str(angle), (int(frame.shape[1]/2)-20, int(frame.shape[0]-20)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
