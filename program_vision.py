@@ -1,20 +1,20 @@
 import cv2
 import numpy as np
 import math
-# import serial
+import serial
 
 # KONFIGURASI
-PORT_SERIAL = "COM10"
-BUFFER = 50
+PORT_SERIAL = "COM101"
+BUFFER = 4
 
 # Variabel Global
 crop_img = None
 angle = -1
 k_buffer = 0
 
-# ser = serial.Serial(PORT_SERIAL, 9600, timeout=0, parity=serial.PARITY_NONE, rtscts=1)
+ser = serial.Serial(PORT_SERIAL, 9600, timeout=0, parity=serial.PARITY_NONE, rtscts=1)
 
-cv2.namedWindow('Trackbars')
+cv2.namedWindow('Trackbars', cv2.WINDOW_NORMAL)
 
 def on_trackbar(val):
     pass
@@ -27,11 +27,17 @@ def creatTrackbar():
     cv2.createTrackbar('S_MAX', 'Trackbars', 255, 255, on_trackbar)
     cv2.createTrackbar('V_MIN', 'Trackbars', 122, 255, on_trackbar)
     cv2.createTrackbar('V_MAX', 'Trackbars', 255, 255, on_trackbar)
+    cv2.createTrackbar('p1', 'Trackbars', 69, 200, on_trackbar)
+    cv2.createTrackbar('p2', 'Trackbars', 19, 200, on_trackbar)
+    cv2.createTrackbar('minrad', 'Trackbars', 83, 200, on_trackbar)
+    cv2.createTrackbar('maxrad', 'Trackbars', 200, 200, on_trackbar)
+    cv2.createTrackbar('offsetx', 'Trackbars', 300, 640, on_trackbar) 
 
 # untuk windows:
-# cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
-cam = cv2.VideoCapture(0)
+cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
+# cam = cv2.VideoCapture(0)
 cam.set(3,640)
 cam.set(4,480)
 
@@ -72,6 +78,14 @@ while True:
     V_min = cv2.getTrackbarPos('V_MIN', 'Trackbars')
     V_max = cv2.getTrackbarPos('V_MAX', 'Trackbars')
 
+    param1 = cv2.getTrackbarPos('p1', 'Trackbars')
+    param2 = cv2.getTrackbarPos('p2', 'Trackbars')
+    minrad = cv2.getTrackbarPos('minrad', 'Trackbars')
+    maxrad = cv2.getTrackbarPos('maxrad', 'Trackbars')
+
+    offsetx = cv2.getTrackbarPos('offsetx', 'Trackbars')
+    
+
     lower_hsv = np.array([H_min, S_min, V_min])
     higher_hsv = np.array([H_max, S_max, V_max])
     
@@ -102,15 +116,18 @@ while True:
 
         gray = cv2.cvtColor(crop_img, cv2.COLOR_BGR2GRAY)
         gray = cv2.medianBlur(gray, 5)
-        circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=40, minRadius=0, maxRadius=0)
+        try:
+            circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 100, param1=param1, param2=param2, minRadius=minrad, maxRadius=maxrad)
+        except:
+            pass
         
         if circles is not None:
           circles = np.uint16(np.around(circles))
-          for i in circles[0,:]:
+          # for i in circles[0,:]:
               # draw the outer circle
-              cv2.circle(crop_img,(i[0],i[1]),i[2],(255,0,0),2)
+              # cv2.circle(crop_img,(i[0],i[1]),i[2],(255,0,0),2)
               # draw the center of the circle
-              cv2.circle(crop_img,(i[0],i[1]),2,(0,0,255),3)
+              # cv2.circle(crop_img,(i[0],i[1]),2,(0,0,255),3)
               # print(i[0], i[1])
 
 
@@ -118,9 +135,10 @@ while True:
           center_x = int(x + (w*0.5))
           center_y = int(y + (h*0.5))
           if w > 5 and h > 5:
-            titik_tengah = (int(frame.shape[1] / 2), int(frame.shape[0]))
+            titik_tengah = (int(frame.shape[1] / 2)+offsetx-320, int(frame.shape[0]))
             cv2.line(frame, titik_tengah, (center_x, center_y), (0, 255, 0), 2, cv2.LINE_AA)
             angle = int(math.atan2(titik_tengah[1] - center_y, titik_tengah[0] - center_x) * 180 / math.pi)
+            angle = angle - 90 if angle > 90 else angle + 270
             cv2.circle(frame, (center_x, center_y), 5, (0,0,255), -1)
             k_buffer = BUFFER
             pass
@@ -129,11 +147,11 @@ while True:
     else:
       buffering(frame)
 
-    # ser.write(str(angle).encode()+b"\n")
+    ser.write(str(angle).encode()+b"\n")
 
     # show angle to frame 
     cv2.putText(frame, str(angle), (int(frame.shape[1]/2)-20, int(frame.shape[0]-20)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-    cv2.imshow('mask', mask)
+    #cv2.imshow('mask', mask)
     cv2.imshow('img', frame)
     # cv2.imshow('img2', crop_img)
 
