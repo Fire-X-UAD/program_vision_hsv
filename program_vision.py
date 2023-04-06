@@ -8,26 +8,27 @@ import json
 crop_img = None
 angle = -1
 k_buffer = 0
-
+config = {}
 # ser = serial.Serial(PORT_SERIAL, 9600, timeout=0, parity=serial.PARITY_NONE, rtscts=1)
 
 cv2.namedWindow('Trackbars', cv2.WINDOW_NORMAL)
 
-default_config = {
-    "H_MIN": 0,
-    "H_MAX": 12,
-    "S_MIN": 60,
-    "S_MAX": 255,
-    "V_MIN": 122,
-    "V_MAX": 255,
-    "p1": 69,
-    "p2": 19,
-    "minrad": 83,
-    "maxrad": 200,
-    "offsetx": 300,
-    "serial": "COM101",
-    "buffer": 4
-}
+# default_config = {
+#     "H_MIN": 0,
+#     "H_MAX": 12,
+#     "S_MIN": 60,
+#     "S_MAX": 255,
+#     "V_MIN": 122,
+#     "V_MAX": 255,
+#     "p1": 69,
+#     "p2": 19,
+#     "minrad": 83,
+#     "maxrad": 200,
+#     "offsetx": 300,
+#     "serial": "COM101",
+#     "buffer": 4
+# }
+default_config = {"H_MIN": 0, "H_MAX": 16, "S_MIN": 119, "S_MAX": 255, "V_MIN": 73, "V_MAX": 255, "p1": 63, "p2": 23, "minrad": 39, "maxrad": 0, "offsetx": 296, "serial": "COM101", "buffer": 4}
 
 
 H_min = H_max = S_min = S_max = V_min = V_max = param1 = param2 = minrad = maxrad = offsetx = 0
@@ -103,12 +104,15 @@ def creatTrackbar():
 
 # untuk windows:
 
-cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+cam = cv2.VideoCapture(1, cv2.CAP_DSHOW)
 
 # cam = cv2.VideoCapture(0)
 cam.set(3,640)
 cam.set(4,480)
-
+cam.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
+cam.set(cv2.CAP_PROP_AUTOFOCUS, 0)
+cam.set(cv2.CAP_PROP_EXPOSURE, -6.9)
+cam.set(cv2.CAP_PROP_FOCUS, 0)
 creatTrackbar()
 
 def buffering(frame):
