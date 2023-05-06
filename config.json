@@ -1,1 +1,1 @@
-{"H_MIN": 0, "H_MAX": 16, "S_MIN": 119, "S_MAX": 255, "V_MIN": 73, "V_MAX": 255, "p1": 63, "p2": 23, "minrad": 39, "maxrad": 0, "offsetx": 296, "serial": "COM101", "buffer": 4}
+{"H_MIN": 0, "H_MAX": 16, "S_MIN": 148, "S_MAX": 254, "V_MIN": 79, "V_MAX": 255, "p1": 49, "p2": 27, "minrad": 39, "maxrad": 0, "offsetx": 304, "serial": "COM101", "buffer": 4}

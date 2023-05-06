@@ -4,12 +4,13 @@ import math
 import serial
 import json
 
+
+
 # Variabel Global
 crop_img = None
 angle = -1
 k_buffer = 0
 config = {}
-# ser = serial.Serial(PORT_SERIAL, 9600, timeout=0, parity=serial.PARITY_NONE, rtscts=1)
 
 cv2.namedWindow('Trackbars', cv2.WINDOW_NORMAL)
 
@@ -58,6 +59,10 @@ offsetx = config["offsetx"]
 PORT_SERIAL = config["serial"]
 BUFFER = config["buffer"]
 
+
+ser = serial.Serial(PORT_SERIAL, 9600, timeout=0, parity=serial.PARITY_NONE, rtscts=1)
+
+
 def on_trackbar(val):
     global config
     config["H_MIN"] = H_min
@@ -104,14 +109,14 @@ def creatTrackbar():
 
 # untuk windows:
 
-cam = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
 # cam = cv2.VideoCapture(0)
 cam.set(3,640)
 cam.set(4,480)
 cam.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
 cam.set(cv2.CAP_PROP_AUTOFOCUS, 0)
-cam.set(cv2.CAP_PROP_EXPOSURE, -6.9)
+cam.set(cv2.CAP_PROP_EXPOSURE, -5.2)
 cam.set(cv2.CAP_PROP_FOCUS, 0)
 creatTrackbar()
 
@@ -165,7 +170,7 @@ while True:
     # higher_hsv = np.array([5, 255, 255], np.uint8)
     
     mask = cv2.inRange(hsv, lower_hsv, higher_hsv)
-    mask = cv2.erode(mask, None, iterations=1)
+    mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=3)
 
     # edged = cv2.Canny(mask, 30, 200)
@@ -219,7 +224,8 @@ while True:
     else:
       buffering(frame)
 
-    # ser.write(str(angle).encode()+b"\n")
+    ser.write(str(angle).encode()+b"\n")
+    print(angle)
 
     # show angle to frame 
     cv2.putText(frame, str(angle), (int(frame.shape[1]/2)-20, int(frame.shape[0]-20)), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
