@@ -3,6 +3,8 @@ import numpy as np
 import math
 import serial
 import json
+from shapely.geometry import Point
+from shapely.geometry.polygon import Polygon
 
 # Variabel Global
 crop_img = None
@@ -99,7 +101,7 @@ def creatTrackbar():
 
 # untuk windows:
 
-cam = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
 # cam = cv2.VideoCapture(0)
 cam.set(3, 640)
@@ -211,8 +213,19 @@ while True:
     else:
         buffering(frame)
 
-    if PORT_SERIAL != '':
-        ser.write(str(angle).encode() + b"\n")
+    cv2.line(frame, (offsetx - 100, frame.shape[0]), (offsetx - 150, 0), (255, 0, 0), 2, cv2.LINE_AA)
+    cv2.line(frame, (offsetx + 100, frame.shape[0]), (offsetx + 150, 0), (255, 0, 0), 2, cv2.LINE_AA)
+    
+    if angle != -1:
+        point = Point(center_x, center_y)
+        polygon = Polygon([
+            (offsetx - 100, frame.shape[0]),
+            (offsetx - 150, 0),
+            (offsetx + 150, 0),
+            (offsetx + 100, frame.shape[0])
+        ])
+        if polygon.contains(point):
+            angle = 0
 
     # show angle to frame 
     cv2.putText(
@@ -225,6 +238,9 @@ while True:
         2,
         cv2.LINE_AA
     )
+
+    if PORT_SERIAL != '':
+        ser.write(str(angle).encode() + b"\n")
 
     if show_result:
         cv2.imshow('img', frame)
