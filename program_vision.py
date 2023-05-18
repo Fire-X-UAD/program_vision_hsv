@@ -12,8 +12,6 @@ angle = -1
 k_buffer = 0
 config = {}
 
-cv2.namedWindow('Trackbars', cv2.WINDOW_NORMAL)
-
 default_config = {
     "H_MIN": 0,
     "H_MAX": 16,
@@ -33,7 +31,6 @@ default_config = {
 
 H_min = H_max = S_min = S_max = V_min = V_max = param1 = param2 = minrad = maxrad = offsetx = 0
 show_result = False
-
 
 def save_config():
     try:
@@ -65,6 +62,9 @@ offsetx = config["offsetx"]
 PORT_SERIAL = config["serial"]
 BUFFER = config["buffer"]
 show_result = config["show_result"]
+
+if show_result:
+    cv2.namedWindow('Trackbars', cv2.WINDOW_NORMAL)
 
 if PORT_SERIAL != '':
     ser = serial.Serial(PORT_SERIAL, 9600, timeout=0, parity=serial.PARITY_NONE, rtscts=1)
@@ -110,7 +110,8 @@ cam.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
 cam.set(cv2.CAP_PROP_AUTOFOCUS, 0)
 cam.set(cv2.CAP_PROP_EXPOSURE, -5.2)
 cam.set(cv2.CAP_PROP_FOCUS, 0)
-creatTrackbar()
+if show_result:
+    creatTrackbar()
 
 
 def buffering(frame):
@@ -142,19 +143,18 @@ while True:
     img = frame
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    H_min = cv2.getTrackbarPos('H_MIN', 'Trackbars')
-    H_max = cv2.getTrackbarPos('H_MAX', 'Trackbars')
-    S_min = cv2.getTrackbarPos('S_MIN', 'Trackbars')
-    S_max = cv2.getTrackbarPos('S_MAX', 'Trackbars')
-    V_min = cv2.getTrackbarPos('V_MIN', 'Trackbars')
-    V_max = cv2.getTrackbarPos('V_MAX', 'Trackbars')
-
-    param1 = cv2.getTrackbarPos('p1', 'Trackbars')
-    param2 = cv2.getTrackbarPos('p2', 'Trackbars')
-    minrad = cv2.getTrackbarPos('minrad', 'Trackbars')
-    maxrad = cv2.getTrackbarPos('maxrad', 'Trackbars')
-
-    offsetx = cv2.getTrackbarPos('offsetx', 'Trackbars')
+    if show_result:
+        H_min = cv2.getTrackbarPos('H_MIN', 'Trackbars')
+        H_max = cv2.getTrackbarPos('H_MAX', 'Trackbars')
+        S_min = cv2.getTrackbarPos('S_MIN', 'Trackbars')
+        S_max = cv2.getTrackbarPos('S_MAX', 'Trackbars')
+        V_min = cv2.getTrackbarPos('V_MIN', 'Trackbars')
+        V_max = cv2.getTrackbarPos('V_MAX', 'Trackbars')
+        param1 = cv2.getTrackbarPos('p1', 'Trackbars')
+        param2 = cv2.getTrackbarPos('p2', 'Trackbars')
+        minrad = cv2.getTrackbarPos('minrad', 'Trackbars')
+        maxrad = cv2.getTrackbarPos('maxrad', 'Trackbars')
+        offsetx = cv2.getTrackbarPos('offsetx', 'Trackbars')
 
     lower_hsv = np.array([H_min, S_min, V_min])
     higher_hsv = np.array([H_max, S_max, V_max])
@@ -227,6 +227,7 @@ while True:
         if polygon.contains(point):
             angle = 0
 
+    print(angle)
     # show angle to frame 
     cv2.putText(
         frame,
@@ -241,6 +242,8 @@ while True:
 
     if PORT_SERIAL != '':
         ser.write(str(angle).encode() + b"\n")
+        ser.flush()
+        ser.flushOutput()
 
     if show_result:
         cv2.imshow('img', frame)

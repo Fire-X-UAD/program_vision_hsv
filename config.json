@@ -11,6 +11,6 @@
   "maxrad": 0,
   "offsetx": 304,
   "serial": "COM101",
-  "buffer": 4,
+  "buffer": 2,
   "show_result": true
 }
