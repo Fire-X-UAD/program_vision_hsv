@@ -11,7 +11,10 @@ crop_img = None
 angle = -1
 k_buffer = 0
 config = {}
-
+H_min = H_max = S_min = S_max = V_min = V_max = param1 = param2 = minrad = maxrad = offsetx = 0
+A_H_min = A_H_max = A_S_min = A_S_max = A_V_min = A_V_max = 0
+show_result = False
+ally = "cyan"
 default_config = {
     "H_MIN": 0,
     "H_MAX": 16,
@@ -42,11 +45,6 @@ default_config = {
     "ally": "cyan"
 }
 
-H_min = H_max = S_min = S_max = V_min = V_max = param1 = param2 = minrad = maxrad = offsetx = 0
-A_H_min = A_H_max = A_S_min = A_S_max = A_V_min = A_V_max = 0
-show_result = False
-ally = "cyan"
-cv2.namedWindow('Ally', cv2.WINDOW_NORMAL)
 
 def save_config():
     try:
@@ -54,52 +52,6 @@ def save_config():
             json.dump(config, f)
     except:
         pass
-
-
-try:
-    with open("config.json", "r+b") as f:
-        config = json.load(f)
-except:
-    config = default_config
-    with open("config.json", "w") as f:
-        json.dump(default_config, f)
-
-H_min = config["H_MIN"]
-H_max = config["H_MAX"]
-S_min = config["S_MIN"]
-S_max = config["S_MAX"]
-V_min = config["V_MIN"]
-V_max = config["V_MAX"]
-param1 = config["p1"]
-param2 = config["p2"]
-minrad = config["minrad"]
-maxrad = config["maxrad"]
-offsetx = config["offsetx"]
-PORT_SERIAL = config["serial"]
-BUFFER = config["buffer"]
-show_result = config["show_result"]
-ally = config["ally"]
-
-if ally == "cyan":
-    A_H_min = config["CYN_H_MIN"]
-    A_H_max = config["CYN_H_MAX"]
-    A_S_min = config["CYN_S_MIN"]
-    A_S_max = config["CYN_S_MAX"]
-    A_V_min = config["CYN_V_MIN"]
-    A_V_max = config["CYN_V_MAX"]
-else:
-    A_H_min = config["MAG_H_MIN"]
-    A_H_max = config["MAG_H_MAX"]
-    A_S_min = config["MAG_S_MIN"]
-    A_S_max = config["MAG_S_MAX"]
-    A_V_min = config["MAG_V_MIN"]
-    A_V_max = config["MAG_V_MAX"]
-
-if show_result:
-    cv2.namedWindow('Trackbars', cv2.WINDOW_NORMAL)
-
-if PORT_SERIAL != '':
-    ser = serial.Serial(PORT_SERIAL, 9600, timeout=0, parity=serial.PARITY_NONE, rtscts=1)
 
 
 def on_trackbar(val):
@@ -146,6 +98,7 @@ def ally_detection(target_frame):
 
     a_contours, a_hierarchy = cv2.findContours(a_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
+    a_angle = -1
     if len(a_contours) > 0:
         a_contours = max(a_contours, key=cv2.contourArea)
         a_x, a_y, a_w, a_h = cv2.boundingRect(a_contours)
@@ -162,10 +115,10 @@ def ally_detection(target_frame):
         a_angle = int(math.atan2(center_point[1] - a_center_y, center_point[0] - a_center_x) * 180 / math.pi)
         a_angle = a_angle - 90 if a_angle > 90 else a_angle + 270
 
-        if show_result:
-            cv2.imshow("Ally", target_frame)
+    if show_result:
+        cv2.imshow("Ally", target_frame)
 
-        return a_angle
+    return a_angle
 
 
 def creatTrackbar():
@@ -186,21 +139,6 @@ def creatTrackbar():
     cv2.createTrackbar('minrad', 'Trackbars', minrad, 200, on_trackbar)
     cv2.createTrackbar('maxrad', 'Trackbars', maxrad, 200, on_trackbar)
     cv2.createTrackbar('offsetx', 'Trackbars', offsetx, 640, on_trackbar)
-
-
-# untuk windows:
-
-cam = cv2.VideoCapture(r"C:\Users\Ihsan\Videos\sample_cyan.mp4")
-
-# cam = cv2.VideoCapture(0)
-cam.set(3, 640)
-cam.set(4, 480)
-cam.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
-cam.set(cv2.CAP_PROP_AUTOFOCUS, 0)
-cam.set(cv2.CAP_PROP_EXPOSURE, -5.2)
-cam.set(cv2.CAP_PROP_FOCUS, 0)
-if show_result:
-    creatTrackbar()
 
 
 def buffering(frame):
@@ -227,124 +165,182 @@ def buffering(frame):
         k_buffer = BUFFER
 
 
+try:
+    with open("config.json", "r+b") as f:
+        config = json.load(f)
+except:
+    config = default_config
+    with open("config.json", "w") as f:
+        json.dump(default_config, f)
+
+H_min = config["H_MIN"]
+H_max = config["H_MAX"]
+S_min = config["S_MIN"]
+S_max = config["S_MAX"]
+V_min = config["V_MIN"]
+V_max = config["V_MAX"]
+param1 = config["p1"]
+param2 = config["p2"]
+minrad = config["minrad"]
+maxrad = config["maxrad"]
+offsetx = config["offsetx"]
+PORT_SERIAL = config["serial"]
+BUFFER = config["buffer"]
+show_result = config["show_result"]
+ally = config["ally"]
+
+if ally == "cyan":
+    A_H_min = config["CYN_H_MIN"]
+    A_H_max = config["CYN_H_MAX"]
+    A_S_min = config["CYN_S_MIN"]
+    A_S_max = config["CYN_S_MAX"]
+    A_V_min = config["CYN_V_MIN"]
+    A_V_max = config["CYN_V_MAX"]
+else:
+    A_H_min = config["MAG_H_MIN"]
+    A_H_max = config["MAG_H_MAX"]
+    A_S_min = config["MAG_S_MIN"]
+    A_S_max = config["MAG_S_MAX"]
+    A_V_min = config["MAG_V_MIN"]
+    A_V_max = config["MAG_V_MAX"]
+
+if PORT_SERIAL != '':
+    ser = serial.Serial(PORT_SERIAL, 9600, timeout=0, parity=serial.PARITY_NONE, rtscts=1)
+
+cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
+# cam = cv2.VideoCapture(0)
+cam.set(cv2.CAP_PROP_FRAME_WIDTH, 480)
+cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 640)
+cam.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
+cam.set(cv2.CAP_PROP_AUTOFOCUS, 0)
+cam.set(cv2.CAP_PROP_EXPOSURE, -5.2)
+cam.set(cv2.CAP_PROP_FOCUS, 0)
+
+if show_result:
+    cv2.namedWindow('Trackbars', cv2.WINDOW_NORMAL)
+    cv2.namedWindow('Ball', cv2.WINDOW_NORMAL)
+    cv2.namedWindow('Ally', cv2.WINDOW_NORMAL)
+
+    cv2.resizeWindow("Trackbars", 400, 800)
+    cv2.resizeWindow("Ball", 640, 480)
+    cv2.resizeWindow("Ally", 640, 480)
+
+if show_result:
+    creatTrackbar()
+
 while True:
     ret, frame = cam.read()
-    img = frame.copy()
+    img = frame
 
     ally_detection(img)
 
-    # hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    #
-    # if show_result:
-    #     H_min = cv2.getTrackbarPos('H_MIN', 'Trackbars')
-    #     H_max = cv2.getTrackbarPos('H_MAX', 'Trackbars')
-    #     S_min = cv2.getTrackbarPos('S_MIN', 'Trackbars')
-    #     S_max = cv2.getTrackbarPos('S_MAX', 'Trackbars')
-    #     V_min = cv2.getTrackbarPos('V_MIN', 'Trackbars')
-    #     V_max = cv2.getTrackbarPos('V_MAX', 'Trackbars')
-    #     A_H_min = cv2.getTrackbarPos('ALLY_H_MIN', 'Trackbars')
-    #     A_H_max = cv2.getTrackbarPos('ALLY_H_MAX', 'Trackbars')
-    #     A_S_min = cv2.getTrackbarPos('ALLY_S_MIN', 'Trackbars')
-    #     A_S_max = cv2.getTrackbarPos('ALLY_S_MAX', 'Trackbars')
-    #     A_V_min = cv2.getTrackbarPos('ALLY_V_MIN', 'Trackbars')
-    #     A_V_max = cv2.getTrackbarPos('ALLY_V_MAX', 'Trackbars')
-    #     param1 = cv2.getTrackbarPos('p1', 'Trackbars')
-    #     param2 = cv2.getTrackbarPos('p2', 'Trackbars')
-    #     minrad = cv2.getTrackbarPos('minrad', 'Trackbars')
-    #     maxrad = cv2.getTrackbarPos('maxrad', 'Trackbars')
-    #     offsetx = cv2.getTrackbarPos('offsetx', 'Trackbars')
-    #
-    # lower_hsv = np.array([H_min, S_min, V_min])
-    # higher_hsv = np.array([H_max, S_max, V_max])
-    #
-    # mask = cv2.inRange(hsv, lower_hsv, higher_hsv)
-    # mask = cv2.erode(mask, None, iterations=2)
-    # mask = cv2.dilate(mask, None, iterations=3)
-    #
-    # contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-    # cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
-    #
-    # if len(contours) > 0:
-    #     # Find the index of the largest contour
-    #     # areas = [cv2.contourArea(c) for c in contours]
-    #     # max_index = np.argmax(areas)
-    #     # cnt=contours[max_index]
-    #     # x,y,w,h = cv2.boundingRect(cnt)
-    #
-    #     c = max(contours, key=cv2.contourArea)
-    #     x, y, w, h = cv2.boundingRect(c)
-    #
-    #     # Crop the image with padding 5px then validate using hough circle
-    #     crop_img = frame[y - 40 if y > 40 else y:y + h + 40, x - 40 if x > 40 else x:x + w + 40]
-    #
-    #     gray = cv2.cvtColor(crop_img, cv2.COLOR_BGR2GRAY)
-    #     gray = cv2.medianBlur(gray, 5)
-    #     try:
-    #         circles = cv2.HoughCircles(
-    #             gray,
-    #             cv2.HOUGH_GRADIENT,
-    #             1,
-    #             100,
-    #             param1=param1,
-    #             param2=param2,
-    #             minRadius=minrad,
-    #             maxRadius=maxrad
-    #         )
-    #     except:
-    #         pass
-    #
-    #     if circles is not None:
-    #         circles = np.uint16(np.around(circles))
-    #         cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 0), 2)
-    #         center_x = int(x + (w * 0.5))
-    #         center_y = int(y + (h * 0.5))
-    #         if w > 5 and h > 5:
-    #             titik_tengah = (int(offsetx), int(frame.shape[0]))
-    #             cv2.line(frame, titik_tengah, (center_x, center_y), (0, 255, 0), 2, cv2.LINE_AA)
-    #             angle = int(math.atan2(titik_tengah[1] - center_y, titik_tengah[0] - center_x) * 180 / math.pi)
-    #             angle = angle - 90 if angle > 90 else angle + 270
-    #             cv2.circle(frame, (center_x, center_y), 5, (0, 0, 255), -1)
-    #             k_buffer = BUFFER
-    #             pass
-    #     else:
-    #         buffering(frame)
-    # else:
-    #     buffering(frame)
-    #
-    # cv2.line(frame, (offsetx - 100, frame.shape[0]), (offsetx - 150, 0), (255, 0, 0), 2, cv2.LINE_AA)
-    # cv2.line(frame, (offsetx + 100, frame.shape[0]), (offsetx + 150, 0), (255, 0, 0), 2, cv2.LINE_AA)
-    #
-    # if angle != -1:
-    #     point = Point(center_x, center_y)
-    #     polygon = Polygon([
-    #         (offsetx - 100, frame.shape[0]),
-    #         (offsetx - 150, 0),
-    #         (offsetx + 150, 0),
-    #         (offsetx + 100, frame.shape[0])
-    #     ])
-    #     if polygon.contains(point):
-    #         angle = 0
-    #
-    # print(angle)
-    # # show angle to frame
-    # cv2.putText(
-    #     frame,
-    #     str(angle),
-    #     (int(frame.shape[1] / 2) - 20, int(frame.shape[0] - 20)),
-    #     cv2.FONT_HERSHEY_SIMPLEX,
-    #     1,
-    #     (0, 0, 255),
-    #     2,
-    #     cv2.LINE_AA
-    # )
-    #
-    # if PORT_SERIAL != '':
-    #     ser.write(str(angle).encode() + b"\n")
-    #     ser.flush()
-    #     ser.flushOutput()
-    #
-    # if show_result:
-    #     cv2.imshow('img', frame)
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    if show_result:
+        H_min = cv2.getTrackbarPos('H_MIN', 'Trackbars')
+        H_max = cv2.getTrackbarPos('H_MAX', 'Trackbars')
+        S_min = cv2.getTrackbarPos('S_MIN', 'Trackbars')
+        S_max = cv2.getTrackbarPos('S_MAX', 'Trackbars')
+        V_min = cv2.getTrackbarPos('V_MIN', 'Trackbars')
+        V_max = cv2.getTrackbarPos('V_MAX', 'Trackbars')
+        A_H_min = cv2.getTrackbarPos('ALLY_H_MIN', 'Trackbars')
+        A_H_max = cv2.getTrackbarPos('ALLY_H_MAX', 'Trackbars')
+        A_S_min = cv2.getTrackbarPos('ALLY_S_MIN', 'Trackbars')
+        A_S_max = cv2.getTrackbarPos('ALLY_S_MAX', 'Trackbars')
+        A_V_min = cv2.getTrackbarPos('ALLY_V_MIN', 'Trackbars')
+        A_V_max = cv2.getTrackbarPos('ALLY_V_MAX', 'Trackbars')
+        param1 = cv2.getTrackbarPos('p1', 'Trackbars')
+        param2 = cv2.getTrackbarPos('p2', 'Trackbars')
+        minrad = cv2.getTrackbarPos('minrad', 'Trackbars')
+        maxrad = cv2.getTrackbarPos('maxrad', 'Trackbars')
+        offsetx = cv2.getTrackbarPos('offsetx', 'Trackbars')
+
+    lower_hsv = np.array([H_min, S_min, V_min])
+    higher_hsv = np.array([H_max, S_max, V_max])
+
+    mask = cv2.inRange(hsv, lower_hsv, higher_hsv)
+    mask = cv2.erode(mask, None, iterations=2)
+    mask = cv2.dilate(mask, None, iterations=3)
+
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
+
+    if len(contours) > 0:
+        c = max(contours, key=cv2.contourArea)
+        x, y, w, h = cv2.boundingRect(c)
+
+        # Crop the image with padding 5px then validate using hough circle
+        crop_img = frame[y - 40 if y > 40 else y:y + h + 40, x - 40 if x > 40 else x:x + w + 40]
+
+        gray = cv2.cvtColor(crop_img, cv2.COLOR_BGR2GRAY)
+        gray = cv2.medianBlur(gray, 5)
+        try:
+            circles = cv2.HoughCircles(
+                gray,
+                cv2.HOUGH_GRADIENT,
+                1,
+                100,
+                param1=param1,
+                param2=param2,
+                minRadius=minrad,
+                maxRadius=maxrad
+            )
+        except:
+            pass
+
+        if circles is not None:
+            circles = np.uint16(np.around(circles))
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 0), 2)
+            center_x = int(x + (w * 0.5))
+            center_y = int(y + (h * 0.5))
+            if w > 5 and h > 5:
+                titik_tengah = (int(offsetx), int(frame.shape[0]))
+                cv2.line(frame, titik_tengah, (center_x, center_y), (0, 255, 0), 2, cv2.LINE_AA)
+                angle = int(math.atan2(titik_tengah[1] - center_y, titik_tengah[0] - center_x) * 180 / math.pi)
+                angle = angle - 90 if angle > 90 else angle + 270
+                cv2.circle(frame, (center_x, center_y), 5, (0, 0, 255), -1)
+                k_buffer = BUFFER
+                pass
+        else:
+            buffering(frame)
+    else:
+        buffering(frame)
+
+    cv2.line(frame, (offsetx - 100, frame.shape[0]), (offsetx - 150, 0), (255, 0, 0), 2, cv2.LINE_AA)
+    cv2.line(frame, (offsetx + 100, frame.shape[0]), (offsetx + 150, 0), (255, 0, 0), 2, cv2.LINE_AA)
+
+    if angle != -1:
+        point = Point(center_x, center_y)
+        polygon = Polygon([
+            (offsetx - 100, frame.shape[0]),
+            (offsetx - 150, 0),
+            (offsetx + 150, 0),
+            (offsetx + 100, frame.shape[0])
+        ])
+        if polygon.contains(point):
+            angle = 0
+
+    print(angle)
+    # show angle to frame
+    cv2.putText(
+        frame,
+        str(angle),
+        (int(frame.shape[1] / 2) - 20, int(frame.shape[0] - 20)),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        1,
+        (0, 0, 255),
+        2,
+        cv2.LINE_AA
+    )
+
+    if PORT_SERIAL != '':
+        ser.write(str(angle).encode() + b"\n")
+        ser.flush()
+        ser.flushOutput()
+
+    if show_result:
+        cv2.imshow('Ball', frame)
 
     key = cv2.waitKey(1)
     if key == 27:  # exit on ESC

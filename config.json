@@ -25,5 +25,5 @@
   "serial": "COM101",
   "buffer": 2,
   "show_result": true,
-  "ally": "magenta"
+  "ally": "cyan"
 }
