@@ -5,6 +5,18 @@
   "S_MAX": 254,
   "V_MIN": 79,
   "V_MAX": 255,
+  "CYN_H_MIN": 93,
+  "CYN_H_MAX": 105,
+  "CYN_S_MIN": 151,
+  "CYN_S_MAX": 255,
+  "CYN_V_MIN": 196,
+  "CYN_V_MAX": 255,
+  "MAG_H_MIN": 0,
+  "MAG_H_MAX": 180,
+  "MAG_S_MIN": 0,
+  "MAG_S_MAX": 255,
+  "MAG_V_MIN": 0,
+  "MAG_V_MAX": 255,
   "p1": 49,
   "p2": 27,
   "minrad": 39,
@@ -12,5 +24,6 @@
   "offsetx": 304,
   "serial": "COM101",
   "buffer": 2,
-  "show_result": true
+  "show_result": true,
+  "ally": "magenta"
 }
