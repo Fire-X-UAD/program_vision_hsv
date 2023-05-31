@@ -251,8 +251,8 @@ while True:
         minrad = cv2.getTrackbarPos('minrad', 'Trackbars')
         maxrad = cv2.getTrackbarPos('maxrad', 'Trackbars')
         offsetx = cv2.getTrackbarPos('offsetx', 'Trackbars')
-        
-    ally_detection(img)
+
+    ally_detection(img.copy())
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
