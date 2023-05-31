@@ -233,10 +233,6 @@ while True:
     ret, frame = cam.read()
     img = frame
 
-    ally_detection(img)
-
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
     if show_result:
         H_min = cv2.getTrackbarPos('H_MIN', 'Trackbars')
         H_max = cv2.getTrackbarPos('H_MAX', 'Trackbars')
@@ -255,6 +251,10 @@ while True:
         minrad = cv2.getTrackbarPos('minrad', 'Trackbars')
         maxrad = cv2.getTrackbarPos('maxrad', 'Trackbars')
         offsetx = cv2.getTrackbarPos('offsetx', 'Trackbars')
+        
+    ally_detection(img)
+
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     lower_hsv = np.array([H_min, S_min, V_min])
     higher_hsv = np.array([H_max, S_max, V_max])
