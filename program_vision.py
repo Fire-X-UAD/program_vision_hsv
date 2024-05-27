@@ -1,11 +1,12 @@
 import cv2
 import numpy as np
 import math
-import serial
+#import serial
+import socket
 import json
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
-
+import os
 # Variabel Global
 crop_img = None
 angle = -1
@@ -66,8 +67,16 @@ show_result = config["show_result"]
 if show_result:
     cv2.namedWindow('Trackbars', cv2.WINDOW_NORMAL)
 
-if PORT_SERIAL != '':
-    ser = serial.Serial(PORT_SERIAL, 9600, timeout=0, parity=serial.PARITY_NONE, rtscts=1)
+# if PORT_SERIAL != '':
+#    ser = serial.Serial(PORT_SERIAL, 9600, timeout=0, parity=serial.PARITY_NONE, rtscts=1)
+
+# UDP Server setup
+UDP_IP = "127.0.0.1"
+UDP_PORT = 5005
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+def send_data(data: str):
+    sock.sendto(data.encode(), (UDP_IP, UDP_PORT))
 
 def on_trackbar(val):
     global config
@@ -101,7 +110,7 @@ def creatTrackbar():
 
 # untuk windows:
 
-cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+cam = cv2.VideoCapture(0, cap.CAP_DPSHOW if os.name == 'nt' else cv2.CAP_ANY)
 
 # cam = cv2.VideoCapture(0)
 cam.set(3, 640)
@@ -141,7 +150,6 @@ def buffering(frame):
 while True:
     ret, frame = cam.read()
     img = frame
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     if show_result:
         H_min = cv2.getTrackbarPos('H_MIN', 'Trackbars')
@@ -155,6 +163,10 @@ while True:
         minrad = cv2.getTrackbarPos('minrad', 'Trackbars')
         maxrad = cv2.getTrackbarPos('maxrad', 'Trackbars')
         offsetx = cv2.getTrackbarPos('offsetx', 'Trackbars')
+
+    ally_detection(img.copy())
+
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     lower_hsv = np.array([H_min, S_min, V_min])
     higher_hsv = np.array([H_max, S_max, V_max])
@@ -239,11 +251,8 @@ while True:
         2,
         cv2.LINE_AA
     )
-
-    if PORT_SERIAL != '':
-        ser.write(str(angle).encode() + b"\n")
-        ser.flush()
-        ser.flushOutput()
+    
+    send_data(str(angle))
 
     if show_result:
         cv2.imshow('img', frame)
